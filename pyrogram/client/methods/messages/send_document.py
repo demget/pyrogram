@@ -32,6 +32,7 @@ class SendDocument(BaseClient):
         document: str,
         thumb: str = None, caption: str = "",
         parse_mode: Union[str, None] = object,
+        file_name: str = None,
         disable_notification: bool = None,
         reply_to_message_id: int = None,
         reply_markup: Union[
@@ -72,6 +73,10 @@ class SendDocument(BaseClient):
                 Pass "markdown" or "md" to enable Markdown-style parsing only.
                 Pass "html" to enable HTML-style parsing only.
                 Pass None to completely disable style parsing.
+
+            file_name (``str``, *optional*):
+                File name of the document sent.
+                Defaults to file's path basename.
 
             disable_notification (``bool``, *optional*):
                 Sends the message silently.
@@ -136,7 +141,7 @@ class SendDocument(BaseClient):
                     file=file,
                     thumb=thumb,
                     attributes=[
-                        types.DocumentAttributeFilename(file_name=os.path.basename(document))
+                        types.DocumentAttributeFilename(file_name=file_name or os.path.basename(document))
                     ]
                 )
             elif document.startswith("http"):

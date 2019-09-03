@@ -322,3 +322,26 @@ class User(Object, Update):
         """
 
         return self._client.unblock_user(self.id)
+
+    def get_common_chats(self):
+        """Bound method *get_common_chats* of :obj:`User`.
+
+        Use as a shortcut for:
+
+        .. code-block:: python
+
+            client.get_common_chats(123456789)
+
+        Example:
+            .. code-block:: python
+
+                user.get_common_chats()
+
+        Returns:
+            True on success.
+
+        Raises:
+            RPCError: In case of a Telegram RPC error.
+        """
+
+        return self._client.get_common_chats(self.id)
