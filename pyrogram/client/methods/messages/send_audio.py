@@ -17,6 +17,7 @@
 # along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import io
 from typing import Union
 
 import pyrogram
@@ -35,7 +36,7 @@ class SendAudio(BaseClient):
         duration: int = 0,
         performer: str = None,
         title: str = None,
-        thumb: str = None,
+        thumb: [str, io.IOBase] = None,
         file_name: str = None,
         disable_notification: bool = None,
         reply_to_message_id: int = None,
@@ -155,7 +156,13 @@ class SendAudio(BaseClient):
 
         try:
             if os.path.exists(audio):
-                thumb = None if thumb is None else await self.save_file(thumb)
+                if isinstance(thumb, str):
+                    thumb = await self.save_file(thumb)
+                elif isinstance(thumb, io.IOBase):
+                    thumb = await self.save_file(raw_bytes=thumb)
+                elif not thumb:
+                    thumb = None
+
                 file = await self.save_file(audio, progress=progress, progress_args=progress_args)
                 media = types.InputMediaUploadedDocument(
                     mime_type=self.guess_mime_type(audio) or "audio/mpeg",

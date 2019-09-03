@@ -17,6 +17,7 @@
 # along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import io
 from typing import Union
 
 import pyrogram
@@ -35,7 +36,7 @@ class SendVideo(BaseClient):
         duration: int = 0,
         width: int = 0,
         height: int = 0,
-        thumb: str = None,
+        thumb: [str, io.IOBase] = None,
         file_name: str = None,
         supports_streaming: bool = True,
         disable_notification: bool = None,
@@ -152,7 +153,13 @@ class SendVideo(BaseClient):
 
         try:
             if os.path.exists(video):
-                thumb = None if thumb is None else await self.save_file(thumb)
+                if isinstance(thumb, str):
+                    thumb = await self.save_file(thumb)
+                elif isinstance(thumb, io.IOBase):
+                    thumb = await self.save_file(raw_bytes=thumb)
+                elif not thumb:
+                    thumb = None
+
                 file = await self.save_file(video, progress=progress, progress_args=progress_args)
                 media = types.InputMediaUploadedDocument(
                     mime_type=self.guess_mime_type(video) or "video/mp4",

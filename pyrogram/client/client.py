@@ -21,6 +21,7 @@ import logging
 import math
 import mimetypes
 import os
+import io
 import re
 import shutil
 import tempfile
@@ -1572,7 +1573,8 @@ class Client(Methods, BaseClient):
                 raise PeerIdInvalid
 
     async def save_file(self,
-                        path: str,
+                        path: str = "",
+                        raw_bytes: io.IOBase = None,
                         file_id: int = None,
                         file_part: int = 0,
                         progress: callable = None,
@@ -1590,6 +1592,9 @@ class Client(Methods, BaseClient):
         Parameters:
             path (``str``):
                 The path of the file you want to upload that exists on your local machine.
+
+            raw_bytes (``io.IOBase``, *optional*):
+                Pass raw bytes if you need to save the file from memory.
 
             file_id (``int``, *optional*):
                 In case a file part expired, pass the file_id and the file_part to retry uploading that specific chunk.
@@ -1639,7 +1644,7 @@ class Client(Methods, BaseClient):
                     log.error(e)
 
         part_size = 512 * 1024
-        file_size = os.path.getsize(path)
+        file_size = raw_bytes.getbuffer().nbytes if raw_bytes else os.path.getsize(path)
 
         if file_size == 0:
             raise ValueError("File size equals to 0 B")
@@ -1662,7 +1667,7 @@ class Client(Methods, BaseClient):
             for session in pool:
                 await session.start()
 
-            with open(path, "rb") as f:
+            with (raw_bytes or open(path, "rb")) as f:
                 f.seek(part_size * file_part)
 
                 while True:
@@ -1708,14 +1713,14 @@ class Client(Methods, BaseClient):
                 return types.InputFileBig(
                     id=file_id,
                     parts=file_total_parts,
-                    name=os.path.basename(path),
+                    name=os.path.basename(path) if path else "",
 
                 )
             else:
                 return types.InputFile(
                     id=file_id,
                     parts=file_total_parts,
-                    name=os.path.basename(path),
+                    name=os.path.basename(path) if path else "",
                     md5_checksum=md5_sum
                 )
         finally:
