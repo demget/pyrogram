@@ -146,12 +146,18 @@ class EditMessageMedia(BaseClient):
                 media = utils.get_input_media_from_file_id(media.media, 4)
         elif isinstance(media, InputMediaAudio):
             if os.path.exists(media.media):
+                thumb = None
+                if isinstance(thumb, str):
+                    thumb = await self.save_file(media.thumb)
+                elif isinstance(thumb, io.IOBase):
+                    thumb = await self.save_file(raw_bytes=media.thumb)
+
                 media = await self.send(
                     functions.messages.UploadMedia(
                         peer=await self.resolve_peer(chat_id),
                         media=types.InputMediaUploadedDocument(
                             mime_type=self.guess_mime_type(media.media) or "audio/mpeg",
-                            thumb=None if media.thumb is None else self.save_file(media.thumb),
+                            thumb=thumb,
                             file=await self.save_file(media.media),
                             attributes=[
                                 types.DocumentAttributeAudio(

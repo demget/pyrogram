@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
+import io
 from typing import Union
 
 from . import InputMedia
@@ -61,7 +62,7 @@ class InputMediaAudio(InputMedia):
     def __init__(
         self,
         media: str,
-        thumb: str = None,
+        thumb: [str, io.IOBase] = None,
         caption: str = "",
         parse_mode: Union[str, None] = object,
         duration: int = 0,
