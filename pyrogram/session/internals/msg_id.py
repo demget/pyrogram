@@ -18,6 +18,7 @@
 
 import logging
 import time
+import os
 
 log = logging.getLogger(__name__)
 
@@ -27,9 +28,5 @@ class MsgId:
     offset = 0
 
     def __new__(cls) -> int:
-        now = int(time.time())
-        cls.offset = (cls.offset + 4) if now == cls.last_time else 0
-        msg_id = (now * 2 ** 32) + cls.offset
-        cls.last_time = now
-
-        return msg_id
+        """Generates a random long integer (8 bytes), which is optionally signed"""
+        return int.from_bytes(os.urandom(8), signed=True, byteorder="little")
